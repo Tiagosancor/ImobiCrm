@@ -1,0 +1,16 @@
+bin/
+obj/
+.vs/
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
+*.user
+*.suo
+*.DS_Store
+/.idea/
+.vscode/
+.env
+node_modules/
+frontend/node_modules/
+frontend/.next/
