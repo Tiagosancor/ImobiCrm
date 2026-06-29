@@ -4,22 +4,19 @@ Pasta: `backend/ImobiCrm.Api`
 
 Passos iniciais para rodar localmente:
 
-1) Subir PostgreSQL com Docker Compose (inicializa o esquema automaticamente):
+1) Subir PostgreSQL com Docker Compose:
 
 ```powershell
-docker-compose up -d
-.\n+# ou
-powershell ./backend/setup-db.ps1
+docker compose up -d
+# ou
+.\backend\setup-db.ps1
 ```
 
-O arquivo `./backend/postgres-init/init.sql` será executado automaticamente na primeira inicialização do container.
-
-2) Restaurar pacotes e criar migrations (opcional se usar o SQL de inicialização):
+2) Aplicar as migrations do Entity Framework Core:
 
 ```powershell
 dotnet restore backend/ImobiCrm.Api
 dotnet tool install --global dotnet-ef
-dotnet ef migrations add InitialCreate --project backend/ImobiCrm.Api
 dotnet ef database update --project backend/ImobiCrm.Api
 ```
 

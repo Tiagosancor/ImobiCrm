@@ -21,6 +21,8 @@ export default function AdminLayout({ children }){
     <div>
       <header style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
         <nav style={{ display: 'flex', gap: 12 }}>
+          <Link href="/admin/dashboard">Dashboard</Link>
+          <Link href="/admin/leads">Leads</Link>
           <Link href="/admin/properties">Imóveis (Admin)</Link>
           <Link href="/">Site</Link>
         </nav>

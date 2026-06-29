@@ -2,7 +2,10 @@ param(
     [int]$DbWaitSeconds = 10
 )
 
-Write-Host "1) Subindo container PostgreSQL via docker-compose..."
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+Push-Location $repoRoot
+
+try {
 Write-Host "1) Subindo container PostgreSQL via docker-compose (tentando 'docker compose' primeiro)..."
 try {
     docker compose up -d
@@ -42,3 +45,7 @@ dotnet ef database update
 
 Write-Host "Rodando a API (pressione Ctrl+C para parar)..."
 dotnet run
+}
+finally {
+    Pop-Location
+}

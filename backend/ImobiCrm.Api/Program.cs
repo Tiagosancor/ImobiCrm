@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,11 +17,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-// CORS - allow frontend dev server
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:3000", "http://127.0.0.1:3000" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost3000", policy =>
-        policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
@@ -51,6 +54,19 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+static bool TryValidate<T>(T dto, out IDictionary<string, string[]> errors)
+{
+    var context = new ValidationContext(dto!);
+    var results = new List<ValidationResult>();
+    var isValid = Validator.TryValidateObject(dto!, context, results, true);
+    errors = results
+        .SelectMany(r => r.MemberNames.DefaultIfEmpty(string.Empty)
+            .Select(memberName => new { memberName, message = r.ErrorMessage ?? "Inválido" }))
+        .GroupBy(x => x.memberName)
+        .ToDictionary(g => g.Key, g => g.Select(x => x.message).ToArray());
+    return isValid;
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -60,7 +76,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Enable CORS for frontend dev server (must run before authentication)
-app.UseCors("AllowLocalhost3000");
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -71,14 +87,6 @@ Directory.CreateDirectory(uploadPath);
 app.UseStaticFiles();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-
-app.MapGet("/debug-config", (IConfiguration config) =>
-{
-    return Results.Ok(new
-    {
-        ConnectionString = config.GetConnectionString("DefaultConnection")
-    });
-});
 
 // Public properties listing with filters and pagination
 app.MapGet("/api/properties", async (ApplicationDbContext db,
@@ -126,6 +134,8 @@ app.MapGet("/api/properties", async (ApplicationDbContext db,
 // CRUD - Properties
 app.MapPost("/api/properties", async (PropertyCreateDto dto, ApplicationDbContext db) =>
 {
+    if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
+
     var prop = new ImobiCrm.Api.Models.Property
     {
         Title = dto.Title,
@@ -152,6 +162,8 @@ app.MapGet("/api/properties/{id}", async (int id, ApplicationDbContext db) =>
 
 app.MapPut("/api/properties/{id}", async (int id, PropertyUpdateDto dto, ApplicationDbContext db) =>
 {
+    if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
+
     var prop = await db.Properties.FindAsync(id);
     if (prop == null) return Results.NotFound();
 
@@ -200,6 +212,8 @@ app.MapPost("/api/properties/{id}/deactivate", async (int id, ApplicationDbConte
 // Auth endpoints
 app.MapPost("/api/auth/register", async (RegisterDto dto, ApplicationDbContext db) =>
 {
+    if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
+
     if (await db.Users.AnyAsync(u => u.Email == dto.Email))
         return Results.Conflict(new { error = "Email já cadastrado" });
 
@@ -214,6 +228,8 @@ app.MapPost("/api/auth/register", async (RegisterDto dto, ApplicationDbContext d
 
 app.MapPost("/api/auth/login", async (LoginDto dto, ApplicationDbContext db) =>
 {
+    if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
+
     var user = await db.Users.SingleOrDefaultAsync(u => u.Email == dto.Email);
     if (user == null) return Results.Unauthorized();
 
@@ -342,6 +358,8 @@ var allowedStatuses = new[] { "Novo", "Contatado", "Visita Agendada", "Fechado",
 
 app.MapPost("/api/leads", async (LeadCreateDto dto, ApplicationDbContext db) =>
 {
+    if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
+
     var lead = new Lead
     {
         PropertyId = dto.PropertyId,
@@ -377,6 +395,8 @@ app.MapPut("/api/leads/{id}/status", async (int id, LeadStatusUpdateDto dto, App
 
 app.MapPut("/api/leads/{id}", async (int id, LeadCreateDto dto, ApplicationDbContext db) =>
 {
+    if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
+
     var lead = await db.Leads.FindAsync(id);
     if (lead == null) return Results.NotFound();
     lead.Name = dto.Name;

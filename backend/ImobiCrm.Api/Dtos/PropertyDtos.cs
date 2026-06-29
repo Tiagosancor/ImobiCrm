@@ -1,25 +1,27 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ImobiCrm.Api.Dtos;
 
 public record PropertyCreateDto(
-    string Title,
+    [property: Required] [property: MaxLength(300)] string Title,
     string? Description,
-    decimal Price,
-    int? Bedrooms,
-    int? Bathrooms,
-    int? GarageSpaces,
-    double? Area,
+    [property: Range(0.01, double.MaxValue)] decimal Price,
+    [property: Range(0, 100)] int? Bedrooms,
+    [property: Range(0, 100)] int? Bathrooms,
+    [property: Range(0, 100)] int? GarageSpaces,
+    [property: Range(0.01, double.MaxValue)] double? Area,
     string? City,
     string? Neighborhood
 );
 
 public record PropertyUpdateDto(
-    string Title,
+    [property: Required] [property: MaxLength(300)] string Title,
     string? Description,
-    decimal Price,
-    int? Bedrooms,
-    int? Bathrooms,
-    int? GarageSpaces,
-    double? Area,
+    [property: Range(0.01, double.MaxValue)] decimal Price,
+    [property: Range(0, 100)] int? Bedrooms,
+    [property: Range(0, 100)] int? Bathrooms,
+    [property: Range(0, 100)] int? GarageSpaces,
+    [property: Range(0.01, double.MaxValue)] double? Area,
     string? City,
     string? Neighborhood,
     bool Active
