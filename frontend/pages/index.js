@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 
 export default function Home() {
   const [q, setQ] = useState('')
@@ -13,23 +15,31 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <h1>Busca de Imóveis</h1>
-      <form onSubmit={search}>
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cidade" />
-        <button type="submit">Buscar</button>
+    <div className="max-w-3xl mx-auto px-6 py-12">
+      <h1 className="text-3xl font-semibold mb-6">Busca de Imóveis</h1>
+      <form onSubmit={search} className="flex gap-3 mb-10">
+        <input
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          placeholder="Cidade"
+          className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+        />
+        <Button type="submit" variant="primary">Buscar</Button>
       </form>
 
       {results && (
         <div>
-          <p>Resultados: {results.total}</p>
-          <ul>
+          <p className="text-sm text-text-secondary mb-4">Resultados: {results.total}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {results.items.map(p => (
-              <li key={p.id}>
-                <Link href={`/properties/${p.id}`}>{p.title} - R$ {p.price}</Link>
-              </li>
+              <Link key={p.id} href={`/properties/${p.id}`}>
+                <Card className="hover:border-accent transition-colors">
+                  <p className="font-medium mb-1">{p.title}</p>
+                  <p className="text-accent font-semibold">R$ {p.price}</p>
+                </Card>
+              </Link>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

@@ -11,7 +11,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -29,7 +28,6 @@ builder.Services.AddCors(options =>
               .AllowCredentials());
 });
 
-// Authentication - JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new Exception("Jwt:Key not configured");
 var issuer = builder.Configuration["Jwt:Issuer"];
 var audience = builder.Configuration["Jwt:Audience"];
@@ -75,20 +73,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Enable CORS for frontend dev server (must run before authentication)
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Static files (serve uploaded images)
 var uploadPath = builder.Configuration["UploadPath"] ?? "wwwroot/uploads";
 Directory.CreateDirectory(uploadPath);
 app.UseStaticFiles();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
-// Public properties listing with filters and pagination
 app.MapGet("/api/properties", async (ApplicationDbContext db,
     [FromQuery] string? city,
     [FromQuery] string? neighborhood,
@@ -131,7 +126,6 @@ app.MapGet("/api/properties", async (ApplicationDbContext db,
     return Results.Ok(new { total, page, pageSize, items });
 });
 
-// CRUD - Properties
 app.MapPost("/api/properties", async (PropertyCreateDto dto, ApplicationDbContext db) =>
 {
     if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
@@ -209,7 +203,6 @@ app.MapPost("/api/properties/{id}/deactivate", async (int id, ApplicationDbConte
     return Results.Ok(prop);
 }).RequireAuthorization();
 
-// Auth endpoints
 app.MapPost("/api/auth/register", async (RegisterDto dto, ApplicationDbContext db) =>
 {
     if (!TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
@@ -285,7 +278,6 @@ app.MapPost("/api/auth/change-password", async (ChangePasswordDto dto, HttpConte
     return Results.Ok();
 }).RequireAuthorization();
 
-// Password recovery (returns token — in production, send via e-mail)
 app.MapPost("/api/auth/recover", async (RecoverDto dto, ApplicationDbContext db) =>
 {
     var user = await db.Users.SingleOrDefaultAsync(u => u.Email == dto.Email);
@@ -296,7 +288,6 @@ app.MapPost("/api/auth/recover", async (RecoverDto dto, ApplicationDbContext db)
     db.Set<PasswordResetToken>().Add(pr);
     await db.SaveChangesAsync();
 
-    // In real app: send email with token. For MVP, return token in response
     return Results.Ok(new { token });
 });
 
@@ -316,7 +307,6 @@ app.MapPost("/api/auth/reset", async (ResetDto dto, ApplicationDbContext db) =>
     return Results.Ok();
 });
 
-// Image upload endpoints
 app.MapPost("/api/properties/{id}/images", async (int id, IFormFile file, ApplicationDbContext db) =>
 {
     var prop = await db.Properties.FindAsync(id);
@@ -338,7 +328,8 @@ app.MapPost("/api/properties/{id}/images", async (int id, IFormFile file, Applic
 
     var url = $"/uploads/{fileName}";
     return Results.Created(url, new { img.Id, img.FileName, url });
-}).RequireAuthorization();
+}).RequireAuthorization().DisableAntiforgery();
+
 
 app.MapDelete("/api/properties/{id}/images/{imageId}", async (int id, int imageId, ApplicationDbContext db) =>
 {
@@ -353,7 +344,6 @@ app.MapDelete("/api/properties/{id}/images/{imageId}", async (int id, int imageI
     return Results.NoContent();
 }).RequireAuthorization();
 
-// Leads: public create (from site) and admin management
 var allowedStatuses = new[] { "Novo", "Contatado", "Visita Agendada", "Fechado", "Perdido" };
 
 app.MapPost("/api/leads", async (LeadCreateDto dto, ApplicationDbContext db) =>

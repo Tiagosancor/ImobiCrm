@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import AdminLayout from '@/components/AdminLayout'
 import { api } from '@/lib/api'
+import MetricCard from '@/components/ui/MetricCard'
 
 const statuses = ['Novo', 'Contatado', 'Visita Agendada', 'Fechado', 'Perdido']
 
@@ -33,23 +34,14 @@ export default function AdminDashboard(){
 
   return (
     <AdminLayout>
-      <h1>Dashboard</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-        <Card title="Total de imóveis" value={propertyTotal} />
-        <Card title="Total de leads" value={leads.length} />
+      <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <MetricCard label="Total de imóveis" value={propertyTotal} />
+        <MetricCard label="Total de leads" value={leads.length} />
         {statuses.map(status => (
-          <Card key={status} title={`Leads: ${status}`} value={leadCounts[status]} />
+          <MetricCard key={status} label={`Leads: ${status}`} value={leadCounts[status]} />
         ))}
       </div>
     </AdminLayout>
-  )
-}
-
-function Card({ title, value }){
-  return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
-      <div style={{ fontSize: 14, color: '#666' }}>{title}</div>
-      <div style={{ fontSize: 32, fontWeight: 700 }}>{value}</div>
-    </div>
   )
 }

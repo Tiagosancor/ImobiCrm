@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import FormInput from '@/components/FormInput'
+import Button from '@/components/ui/Button'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -45,26 +47,29 @@ export default function PropertyPage(){
     }
   }
 
-  if(!property) return <div>Carregando...</div>
+  if(!property) return <div className="max-w-3xl mx-auto px-6 py-12 text-text-secondary">Carregando...</div>
 
   return (
-    <div>
-      <h1>{property.title}</h1>
+    <div className="max-w-3xl mx-auto px-6 py-12">
+      <h1 className="text-3xl font-semibold mb-4">{property.title}</h1>
+
       {property.images?.length ? (
-        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 16 }}>
+        <div className="grid gap-3 mb-8" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
           {property.images.map(image => (
             <img
               key={image.id}
               src={`${API_URL}/uploads/${image.fileName}`}
               alt={property.title}
-              style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 8 }}
+              className="w-full h-64 object-cover rounded-xl"
             />
           ))}
         </div>
       ) : null}
-      <p>{property.description}</p>
-      <p>Preço: R$ {property.price}</p>
-      <ul>
+
+      <p className="text-text-secondary mb-4">{property.description}</p>
+      <p className="text-2xl text-accent font-semibold mb-6">R$ {property.price}</p>
+
+      <ul className="grid grid-cols-2 gap-2 text-sm text-text-secondary mb-10">
         <li>Quartos: {property.bedrooms ?? '-'}</li>
         <li>Banheiros: {property.bathrooms ?? '-'}</li>
         <li>Vagas: {property.garageSpaces ?? '-'}</li>
@@ -73,14 +78,17 @@ export default function PropertyPage(){
         <li>Bairro: {property.neighborhood || '-'}</li>
       </ul>
 
-      <h2>Contato</h2>
-      {sent && <p>Mensagem enviada! Entraremos em contato em breve.</p>}
-      <form onSubmit={submit} style={{ display: 'grid', gap: 12, maxWidth: 480 }}>
-        <input placeholder="Nome" value={name} onChange={e=>setName(e.target.value)} required />
-        <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
-        <input placeholder="Telefone" value={phone} onChange={e=>setPhone(e.target.value)} />
-        <textarea placeholder="Mensagem" value={message} onChange={e=>setMessage(e.target.value)} rows={5} />
-        <button type="submit" disabled={sending}>{sending ? 'Enviando...' : 'Enviar mensagem'}</button>
+      <h2 className="text-lg font-semibold mb-3">Contato</h2>
+      {sent && <p className="text-green-700 bg-green-50 rounded-md px-3 py-2 mb-4 text-sm">Mensagem enviada! Entraremos em contato em breve.</p>}
+
+      <form onSubmit={submit} className="grid gap-1 max-w-md">
+        <FormInput value={name} onChange={setName} placeholder="Nome" required />
+        <FormInput value={email} onChange={setEmail} placeholder="Email" />
+        <FormInput value={phone} onChange={setPhone} placeholder="Telefone" />
+        <FormInput value={message} onChange={setMessage} placeholder="Mensagem" textarea rows={5} />
+        <Button type="submit" variant="primary" disabled={sending} className="mt-2 w-fit">
+          {sending ? 'Enviando...' : 'Enviar mensagem'}
+        </Button>
       </form>
     </div>
   )
