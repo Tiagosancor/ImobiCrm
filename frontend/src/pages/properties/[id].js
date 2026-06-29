@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import FormInput from '@/components/FormInput'
-import Button from '@/components/ui/Button'
+import FormInput from '@/src/components/FormInput'
+import Button from '@/src/components/ui/Button'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 

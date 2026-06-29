@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import AdminLayout from '@/components/AdminLayout'
-import { api } from '@/lib/api'
-import MetricCard from '@/components/ui/MetricCard'
+import AdminLayout from '@/src/components/AdminLayout'
+import { api } from '@/src/lib/api'
+import MetricCard from '@/src/components/ui/MetricCard'
 
 const statuses = ['Novo', 'Contatado', 'Visita Agendada', 'Fechado', 'Perdido']
 
