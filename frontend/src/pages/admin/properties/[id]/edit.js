@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import AdminLayout from '@/src/components/AdminLayout'
-import { api } from '@/src/lib/api'
-import FormInput from '@/src/components/FormInput'
+import AdminLayout from '@/components/AdminLayout'
+import { api } from '@/lib/api'
+import FormInput from '@/components/FormInput'
 
 export default function EditProperty(){
   const router = useRouter()

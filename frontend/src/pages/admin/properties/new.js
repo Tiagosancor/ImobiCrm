@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import AdminLayout from '@/src/components/AdminLayout'
-import { api } from '@/src/lib/api'
+import AdminLayout from '@/components/AdminLayout'
+import { api } from '@/lib/api'
 import Router from 'next/router'
-import FormInput from '@/src/components/FormInput'
+import FormInput from '@/components/FormInput'
 
 export default function NewProperty(){
   const [title, setTitle] = useState('')

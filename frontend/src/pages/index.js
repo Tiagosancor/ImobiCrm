@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
-import Card from '@/src/components/ui/Card'
-import Button from '@/src/components/ui/Button'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 
 export default function Home() {
   const [q, setQ] = useState('')

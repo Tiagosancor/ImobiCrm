@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import AdminLayout from '@/src/components/AdminLayout'
-import { api } from '@/src/lib/api'
-import Card from '@/src/components/ui/Card'
-import Badge from '@/src/components/ui/Badge'
+import AdminLayout from '@/components/AdminLayout'
+import { api } from '@/lib/api'
+import Card from '@/components/ui/Card'
+import Badge from '@/components/ui/Badge'
 
 const statuses = ['Novo', 'Contatado', 'Visita Agendada', 'Fechado', 'Perdido']
 
