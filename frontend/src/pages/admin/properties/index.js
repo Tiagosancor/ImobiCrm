@@ -4,28 +4,36 @@ import AdminLayout from '@/components/AdminLayout'
 import { api } from '@/lib/api'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import Modal from '@/components/ui/Modal'
+import Button from '@/components/ui/Button'
 
-export default function AdminProperties(){
+export default function AdminProperties() {
   const [items, setItems] = useState([])
+  const [pendingDeleteId, setPendingDeleteId] = useState(null)
 
-  const load = async ()=>{
-    try{
+  const load = async () => {
+    try {
       const res = await api().get('/api/properties?page=1&pageSize=1000')
       setItems(res.data.items)
-    }catch(err){
+    } catch (err) {
       alert('Falha ao carregar imóveis')
     }
   }
 
-  useEffect(()=>{ load() }, [])
+  useEffect(() => { load() }, [])
 
-  const remove = async (id)=>{
-    if(!confirm('Confirma exclusão?')) return
+  const remove = async (id) => {
     await api().delete(`/api/properties/${id}`)
     load()
   }
 
-  const toggleActive = async (id, active)=>{
+  const confirmDelete = async () => {
+    const id = pendingDeleteId
+    setPendingDeleteId(null)
+    await remove(id)
+  }
+
+  const toggleActive = async (id, active) => {
     await api().post(`/api/properties/${id}/${active ? 'deactivate' : 'activate'}`)
     load()
   }
@@ -53,15 +61,15 @@ export default function AdminProperties(){
                 <Link href={`/admin/properties/${p.id}/edit`} className="text-accent">Editar</Link>
                 <a
                   href="#"
-                  onClick={e=>{e.preventDefault(); toggleActive(p.id, p.active)}}
+                  onClick={e => { e.preventDefault(); toggleActive(p.id, p.active) }}
                   className="text-text-secondary hover:text-text-primary"
                 >
                   {p.active ? 'Desativar' : 'Ativar'}
                 </a>
-                
+
                 <a
                   href="#"
-                  onClick={e=>{e.preventDefault(); remove(p.id)}}
+                  onClick={e => { e.preventDefault(); setPendingDeleteId(p.id) }}
                   className="text-red-600 hover:text-red-700"
                 >
                   Excluir
@@ -71,6 +79,15 @@ export default function AdminProperties(){
           </Card>
         ))}
       </div>
+      <Modal isOpen={pendingDeleteId !== null} onClose={() => setPendingDeleteId(null)} title="Confirmar exclusão">
+        <p className="text-sm text-text-secondary mb-5">
+          Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>Cancelar</Button>
+          <Button variant="danger" onClick={confirmDelete}>Excluir</Button>
+        </div>
+      </Modal>
     </AdminLayout>
   )
 }
