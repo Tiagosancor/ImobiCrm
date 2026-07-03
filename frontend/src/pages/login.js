@@ -2,6 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import Router from 'next/router'
 import FormInput from '../components/FormInput'
+import Layout from '@/components/Layout'
 
 export default function Login(){
   const [email, setEmail] = useState('')
@@ -26,14 +27,16 @@ export default function Login(){
   }
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={submit}>
-        <FormInput label="Email" value={email} onChange={setEmail} error={errors.email} />
-        <FormInput label="Senha" type="password" value={password} onChange={setPassword} error={errors.password} />
-        {errors.form && <div style={{ color: 'red' }}>{errors.form}</div>}
-        <button type="submit">Entrar</button>
-      </form>
-    </div>
+    <Layout>
+      <div>
+        <h1>Login</h1>
+        <form onSubmit={submit}>
+          <FormInput label="Email" value={email} onChange={setEmail} error={errors.email} />
+          <FormInput label="Senha" type="password" value={password} onChange={setPassword} error={errors.password} />
+          {errors.form && <div style={{ color: 'red' }}>{errors.form}</div>}
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
+    </Layout>
   )
 }
