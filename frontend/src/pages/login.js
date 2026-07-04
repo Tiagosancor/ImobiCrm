@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
-import Router from 'next/router'
 import FormInput from '../components/FormInput'
 import Layout from '@/components/Layout'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Login(){
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
@@ -19,8 +20,7 @@ export default function Login(){
     try{
       const res = await axios.post('/api/auth/login', { email, password }, { baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000' })
       const token = res.data.token
-      localStorage.setItem('token', token)
-      Router.push('/admin/properties')
+      login(token)
     }catch(err){
       setErrors({ form: err?.response?.data?.error || 'Login falhou' })
     }

@@ -1,13 +1,12 @@
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { api } from '@/lib/api'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function AdminLayout({ children }) {
   const router = useRouter()
-  const [checking, setChecking] = useState(true)
+  const { user, loading, logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [user, setUser] = useState(null)
 
   const links = [
     { href: '/admin/dashboard', label: 'Dashboard' },
@@ -16,23 +15,12 @@ export default function AdminLayout({ children }) {
     { href: '/', label: 'Site' },
   ]
 
-  useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-    if (!token) {
-      router.push('/login')
-    } else {
-      api().get('/api/auth/me')
-        .then(res => {
-          setUser(res.data)
-          setChecking(false)
-        })
-        .catch(err => {
-          router.push('/login')
-        })
-    }
-  }, [])
+  if (loading) return <div>Verificando autenticação...</div>
 
-  if (checking) return <div>Verificando autenticação...</div>
+  if (!user) {
+    router.push('/login')
+    return null
+  }
 
   return (
     <div>
@@ -46,18 +34,17 @@ export default function AdminLayout({ children }) {
         {/* sidebar */}
         <aside className={`w-64 min-h-screen bg-surface border-r border-border px-4 py-6 
       ${sidebarOpen ? 'block' : 'hidden'} md:block`}>
-        <div className="text-lg font-semibold text-accent mb-6">Imob Crm</div>
+          <div className="text-lg font-semibold text-accent mb-6">Imob Crm</div>
           <nav className="flex flex-col gap-2">
             {links.map(link => (
               <Link
                 onClick={() => setSidebarOpen(false)}
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-2 rounded-md text-sm ${
-                  router.pathname === link.href
-                    ? 'text-accent font-medium' 
+                className={`px-3 py-2 rounded-md text-sm ${router.pathname === link.href
+                    ? 'text-accent font-medium'
                     : 'text-text-secondary hover:text-text-primary'
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>
@@ -65,17 +52,13 @@ export default function AdminLayout({ children }) {
           </nav>
         </aside>
 
-        {/* conteúdo principal */}
         <main className="flex-1 px-6 py-8">
           <header className="flex justify-between items-center mb-8 pb-4 border-b border-border">
             <span className="text-sm text-text-secondary">
               Olá, {user?.name}
             </span>
             <button
-              onClick={() => {
-                localStorage.removeItem('token')
-                router.push('/login')
-              }}
+              onClick={logout}
               className="text-sm text-text-secondary hover:text-text-primary"
             >
               Sair
