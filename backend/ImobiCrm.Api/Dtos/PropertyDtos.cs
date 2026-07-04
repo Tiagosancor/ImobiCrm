@@ -26,3 +26,8 @@ public record PropertyUpdateDto(
     string? Neighborhood,
     bool Active
 );
+
+public class ImageOrderDto
+{
+    public List<int> ImageIds { get; set; } = new();
+}

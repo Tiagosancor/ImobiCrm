@@ -7,4 +7,6 @@ public class PropertyImage
     public string FileName { get; set; } = null!;
 
     public Property? Property { get; set; }
+    public int Order { get; set; }
+    public bool IsMain { get; set; }
 }

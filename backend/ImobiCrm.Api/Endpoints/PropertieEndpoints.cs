@@ -8,7 +8,7 @@ namespace ImobiCrm.Api.Endpoints;
 
 public static class PropertieEndpoints
 {
-   
+
     public static void MapPropertieEndpoints(this WebApplication app, string uploadPath)
     {
         app.MapGet("/api/properties", async (ApplicationDbContext db,
@@ -78,7 +78,10 @@ public static class PropertieEndpoints
         app.MapGet("/api/properties/{id}", async (int id, ApplicationDbContext db) =>
         {
             var prop = await db.Properties.Include(p => p.Images).SingleOrDefaultAsync(p => p.Id == id);
-            return prop is null ? Results.NotFound() : Results.Ok(prop);
+            if (prop is null) return Results.NotFound();
+
+            prop.Images = prop.Images.OrderBy(i => i.Order).ToList();
+            return Results.Ok(prop);
         });
 
         app.MapPut("/api/properties/{id}", async (int id, PropertyUpdateDto dto, ApplicationDbContext db) =>
@@ -164,6 +167,35 @@ public static class PropertieEndpoints
             db.PropertyImages.Remove(img);
             await db.SaveChangesAsync();
             return Results.NoContent();
+        }).RequireAuthorization();
+
+        app.MapPut("/api/properties/{id}/images/{imageId}/main", async (int id, int imageId, ApplicationDbContext db) =>
+        {
+            var images = await db.PropertyImages.Where(i => i.PropertyId == id).ToListAsync();
+            var target = images.SingleOrDefault(i => i.Id == imageId);
+            if (target == null) return Results.NotFound();
+
+            foreach (var img in images)
+            {
+                img.IsMain = img.Id == imageId;
+            }
+
+            await db.SaveChangesAsync();
+            return Results.Ok(target);
+        }).RequireAuthorization();
+
+        app.MapPut("/api/properties/{id}/images/order", async (int id, ImageOrderDto dto, ApplicationDbContext db) =>
+        {
+            var images = await db.PropertyImages.Where(i => i.PropertyId == id).ToListAsync();
+
+            foreach (var (imageId, index) in dto.ImageIds.Select((imageId, index) => (imageId, index)))
+            {
+                var img = images.SingleOrDefault(i => i.Id == imageId);
+                if (img != null) img.Order = index;
+            }
+
+            await db.SaveChangesAsync();
+            return Results.Ok(images.OrderBy(i => i.Order));
         }).RequireAuthorization();
     }
 }
