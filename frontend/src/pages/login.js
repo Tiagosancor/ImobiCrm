@@ -3,6 +3,7 @@ import axios from 'axios'
 import FormInput from '../components/FormInput'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
+import Button from '@/components/ui/Button'
 
 export default function Login(){
   const { login } = useAuth()
@@ -34,7 +35,9 @@ export default function Login(){
           <FormInput label="Email" value={email} onChange={setEmail} error={errors.email} />
           <FormInput label="Senha" type="password" value={password} onChange={setPassword} error={errors.password} />
           {errors.form && <div style={{ color: 'red' }}>{errors.form}</div>}
-          <button type="submit">Entrar</button>
+          <Button variant="primary" type="submit">
+            Entrar
+          </Button>
         </form>
       </div>
     </Layout>

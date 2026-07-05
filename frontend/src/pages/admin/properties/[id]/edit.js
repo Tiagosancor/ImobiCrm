@@ -3,8 +3,14 @@ import { useRouter } from 'next/router'
 import AdminLayout from '@/components/AdminLayout'
 import { api } from '@/lib/api'
 import FormInput from '@/components/FormInput'
+import { DragDropProvider } from '@dnd-kit/react'
+import { move } from '@dnd-kit/helpers'
+import SortableImage from '@/components/SortableImage'
+import Card from '@/components/ui/Card'
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
-export default function EditProperty(){
+export default function EditProperty() {
   const router = useRouter()
   const { id } = router.query
   const [property, setProperty] = useState(null)
@@ -13,8 +19,8 @@ export default function EditProperty(){
   const [description, setDescription] = useState('')
   const [images, setImages] = useState([])
 
-  const load = async ()=>{
-    if(!id) return
+  const load = async () => {
+    if (!id) return
     const res = await api().get(`/api/properties/${id}`)
     setProperty(res.data)
     setTitle(res.data.title)
@@ -23,59 +29,93 @@ export default function EditProperty(){
     setImages(res.data.images || [])
   }
 
-  useEffect(()=>{ load() }, [id])
+  useEffect(() => { load() }, [id])
 
   const [errors, setErrors] = useState({})
 
-  const save = async (e)=>{
+  const save = async (e) => {
     e.preventDefault()
     const errs = {}
-    if(!title) errs.title = 'Título é obrigatório'
-    if(price <= 0) errs.price = 'Preço deve ser maior que zero'
+    if (!title) errs.title = 'Título é obrigatório'
+    if (price <= 0) errs.price = 'Preço deve ser maior que zero'
     setErrors(errs)
-    if(Object.keys(errs).length) return
+    if (Object.keys(errs).length) return
     await api().put(`/api/properties/${id}`, { title, description, price, bedrooms: property.bedrooms, bathrooms: property.bathrooms, garageSpaces: property.garageSpaces, area: property.area, city: property.city, neighborhood: property.neighborhood, active: property.active || true })
     alert('Salvo')
   }
 
-  const upload = async (e)=>{
+  const upload = async (e) => {
     const file = e.target.files[0]
-    if(!file) return
+    if (!file) return
     const fd = new FormData()
     fd.append('file', file)
     const res = await api().post(`/api/properties/${id}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
     setImages(prev => [...prev, { id: res.data.id, fileName: res.data.fileName }])
   }
 
-  const removeImage = async (imageId)=>{
-    if(!confirm('Remover imagem?')) return
+  const removeImage = async (imageId) => {
+    if (!confirm('Remover imagem?')) return
     await api().delete(`/api/properties/${id}/images/${imageId}`)
     setImages(prev => prev.filter(i => i.id !== imageId))
   }
 
-  if(!property) return <AdminLayout><div>Carregando...</div></AdminLayout>
+  const setMainImage = async (imageId) => {
+    await api().put(`/api/properties/${id}/images/${imageId}/main`)
+    setImages(prev => prev.map(i => ({ ...i, isMain: i.id === imageId })))
+  }
+
+  const handleDragEnd = (event) => {
+    if (event.canceled) return
+
+    setImages((images) => move(images, event))
+
+    const newOrder = move(images, event).map(img => img.id)
+    api().put(`/api/properties/${id}/images/order`, { imageIds: newOrder })
+  }
+
+  if (!property) return <AdminLayout><div>Carregando...</div></AdminLayout>
 
   return (
     <AdminLayout>
       <h1>Editar Imóvel #{id}</h1>
-      <form onSubmit={save}>
-        <FormInput label="Título" value={title} onChange={setTitle} error={errors.title} />
-        <FormInput label="Preço" type="number" value={price} onChange={v=>setPrice(Number(v))} error={errors.price} />
-        <FormInput label="Descrição" textarea value={description} onChange={setDescription} />
-        <button type="submit">Salvar</button>
-      </form>
+      <Card>
+        <form onSubmit={save}>
+          <FormInput label="Título" value={title} onChange={setTitle} error={errors.title} />
+          <FormInput label="Preço" type="number" value={price} onChange={v => setPrice(Number(v))} error={errors.price} />
+          <FormInput label="Descrição" textarea value={description} onChange={setDescription} />
+          <Button variant="primary" type="submit">
+            Salvar
+          </Button>
+        </form>
+      </Card>
 
       <section>
         <h2>Imagens</h2>
         <input type="file" onChange={upload} />
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          {images.map(img => (
-            <div key={img.id} style={{ textAlign: 'center' }}>
-              <img src={(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/uploads/' + img.fileName} alt="" style={{ width: 120, height: 80, objectFit: 'cover' }} />
-              <div><button onClick={()=>removeImage(img.id)}>Remover</button></div>
-            </div>
-          ))}
-        </div>
+        <DragDropProvider onDragEnd={handleDragEnd}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            {images.map((img, index) => (
+              <SortableImage key={img.id} id={img.id} index={index}>
+                <Card className="p-2 w-40">
+                  {img.isMain === true && <Badge status="ativo">Imagem Principal</Badge>}
+                  <img
+                    src={(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/uploads/' + img.fileName}
+                    alt=""
+                    className="w-full h-20 object-cover rounded-md my-2"
+                  />
+                  <div className="flex flex-col gap-1">
+                    <Button variant="secondary" onClick={() => removeImage(img.id)}>
+                      Remover
+                    </Button>
+                    <Button variant="primary" onClick={() => setMainImage(img.id)}>
+                      Definir como principal
+                    </Button>
+                  </div>
+                </Card>
+              </SortableImage>
+            ))}
+          </div>
+        </DragDropProvider>
       </section>
     </AdminLayout>
   )

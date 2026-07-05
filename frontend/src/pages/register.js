@@ -3,6 +3,7 @@ import axios from 'axios'
 import Router from 'next/router'
 import FormInput from '../components/FormInput'
 import Layout from '@/components/Layout'
+import Button from '@/components/ui/Button'
 
 export default function Register(){
   const [name, setName] = useState('')
@@ -36,7 +37,9 @@ export default function Register(){
           <FormInput label="Email" value={email} onChange={setEmail} error={errors.email} />
           <FormInput label="Senha" type="password" value={password} onChange={setPassword} error={errors.password} />
           {errors.form && <div style={{ color: 'red' }}>{errors.form}</div>}
-          <button type="submit">Registrar</button>
+          <Button variant="primary" type="submit">
+            Registrar
+          </Button>
         </form>
       </div>
     </Layout>
