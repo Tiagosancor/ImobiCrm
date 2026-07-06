@@ -20,3 +20,4 @@ frontend/.next/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+backend/ImobiCrm.Api/wwwroot/uploads/*
