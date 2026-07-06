@@ -13,6 +13,14 @@ public record LoginDto(
 	[property: Required] string Password
 );
 
-public record ChangePasswordDto(string CurrentPassword, string NewPassword);
-public record RecoverDto(string Email);
-public record ResetDto(string Token, string NewPassword);
+public record ChangePasswordDto(
+	[property: Required] string CurrentPassword,
+	[property: Required] [property: MinLength(6)] string NewPassword
+);
+public record RecoverDto(
+	[property: Required] [property: EmailAddress] string Email
+);
+public record ResetDto(
+[property: Required] string Token,
+[property: Required] [property: MinLength(6)] string NewPassword
+);
