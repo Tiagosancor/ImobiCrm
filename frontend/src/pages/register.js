@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import Router from 'next/router'
-import FormInput from '../components/FormInput'
+import FormInput from '@/components/FormInput'
 import Layout from '@/components/Layout'
 import Button from '@/components/ui/Button'
 

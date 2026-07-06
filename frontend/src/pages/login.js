@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
-import FormInput from '../components/FormInput'
+import FormInput from '@/components/FormInput'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import Button from '@/components/ui/Button'
