@@ -67,7 +67,7 @@ app.UseStaticFiles();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
-app.MapPropertieEndpoints(uploadPath);
+app.MapPropertyEndpoints(uploadPath);
 
 app.MapAuthEndpoints(builder.Configuration);
 

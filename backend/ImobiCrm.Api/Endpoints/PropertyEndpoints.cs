@@ -6,10 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ImobiCrm.Api.Endpoints;
 
-public static class PropertieEndpoints
+public static class PropertyEndpoints
 {
-
-    public static void MapPropertieEndpoints(this WebApplication app, string uploadPath)
+    public static void MapPropertyEndpoints(this WebApplication app, string uploadPath)
     {
         app.MapGet("/api/properties", async (ApplicationDbContext db,
             [FromQuery] string? city,
