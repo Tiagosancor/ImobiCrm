@@ -18,6 +18,7 @@ export default function Home() {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-6 py-12">
+        <Card>
         <h1 className="text-3xl font-semibold mb-6">Busca de Imóveis</h1>
         <form onSubmit={search} className="flex gap-3 mb-10">
           <input
@@ -28,6 +29,7 @@ export default function Home() {
           />
           <Button type="submit" variant="primary">Buscar</Button>
         </form>
+        </Card>
 
         {results && (
           <div>

@@ -4,8 +4,9 @@ import FormInput from '@/components/FormInput'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import Button from '@/components/ui/Button'
+import Card from '@/components/ui/Card'
 
-export default function Login(){
+export default function Login() {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -14,15 +15,15 @@ export default function Login(){
   const submit = async (ev) => {
     ev.preventDefault()
     const errs = {}
-    if(!email) errs.email = 'Email é obrigatório'
-    if(!password) errs.password = 'Senha é obrigatória'
+    if (!email) errs.email = 'Email é obrigatório'
+    if (!password) errs.password = 'Senha é obrigatória'
     setErrors(errs)
-    if(Object.keys(errs).length) return
-    try{
+    if (Object.keys(errs).length) return
+    try {
       const res = await axios.post('/api/auth/login', { email, password }, { baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000' })
       const token = res.data.token
       login(token)
-    }catch(err){
+    } catch (err) {
       setErrors({ form: err?.response?.data?.error || 'Login falhou' })
     }
   }
@@ -30,15 +31,17 @@ export default function Login(){
   return (
     <Layout>
       <div>
-        <h1>Login</h1>
-        <form onSubmit={submit}>
-          <FormInput label="Email" value={email} onChange={setEmail} error={errors.email} />
-          <FormInput label="Senha" type="password" value={password} onChange={setPassword} error={errors.password} />
-          {errors.form && <div style={{ color: 'red' }}>{errors.form}</div>}
-          <Button variant="primary" type="submit">
-            Entrar
-          </Button>
-        </form>
+        <Card>
+          <h1 className="text-2xl font-semibold mb-6">Login</h1>
+          <form onSubmit={submit}>
+            <FormInput label="Email" value={email} onChange={setEmail} error={errors.email} />
+            <FormInput label="Senha" type="password" value={password} onChange={setPassword} error={errors.password} />
+            {errors.form && <div className="text-red-600 text-sm mt-1">{errors.form}</div>}
+            <Button variant="primary" type="submit">
+              Entrar
+            </Button>
+          </form>
+        </Card>
       </div>
     </Layout>
   )
