@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import AdminLayout from '@/components/AdminLayout'
-import { api } from '@/lib/api'
+import { leadService } from '@/services/leadService'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { LEAD_STATUSES, LEAD_STATUS_BADGE_KEY } from '@/constants/leadStatus'
+
+
 
 
 export default function AdminLeads() {
@@ -13,7 +15,7 @@ export default function AdminLeads() {
 
   const load = async () => {
     try {
-      const res = await api().get('/api/leads')
+      const res = await leadService.list()
       setItems(res.data)
     } catch (err) {
       alert('Falha ao carregar leads')
@@ -29,7 +31,7 @@ export default function AdminLeads() {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await api().put(`/api/leads/${id}/status`, { status })
+      const res = await leadService.changeStatus(id, status)
       setItems(current => current.map(item => item.id === id ? res.data : item))
     } catch (err) {
       alert('Falha ao atualizar status do lead')

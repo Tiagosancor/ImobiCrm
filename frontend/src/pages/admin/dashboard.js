@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import AdminLayout from '@/components/AdminLayout'
-import { api } from '@/lib/api'
+import { leadService } from '@/services/leadService'
+import { propertyService } from '@/services/propertyService'
 import MetricCard from '@/components/ui/MetricCard'
 import { LEAD_STATUSES } from '@/constants/leadStatus'
 
@@ -12,8 +13,8 @@ export default function AdminDashboard() {
   const load = async () => {
     try {
       const [propertiesRes, leadsRes] = await Promise.all([
-        api().get('/api/properties?page=1&pageSize=1'),
-        api().get('/api/leads'),
+        propertyService.listAdmin({ page: 1, pageSize: 1 }),
+        leadService.list()
       ])
       setPropertyTotal(propertiesRes.data.total || 0)
       setLeads(leadsRes.data || [])
