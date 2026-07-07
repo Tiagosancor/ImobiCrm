@@ -4,42 +4,34 @@ import AdminLayout from '@/components/AdminLayout'
 import { api } from '@/lib/api'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import { LEAD_STATUSES, LEAD_STATUS_BADGE_KEY } from '@/constants/leadStatus'
 
-const statuses = ['Novo', 'Contatado', 'Visita Agendada', 'Fechado', 'Perdido']
 
-const STATUS_KEY = {
-  'Novo': 'novo',
-  'Contatado': 'contatado',
-  'Visita Agendada': 'visita',
-  'Fechado': 'fechado',
-  'Perdido': 'perdido',
-}
-
-export default function AdminLeads(){
+export default function AdminLeads() {
   const [items, setItems] = useState([])
   const [filterStatus, setFilterStatus] = useState('Todos')
 
-  const load = async ()=>{
-    try{
+  const load = async () => {
+    try {
       const res = await api().get('/api/leads')
       setItems(res.data)
-    }catch(err){
+    } catch (err) {
       alert('Falha ao carregar leads')
     }
   }
 
-  useEffect(()=>{ load() }, [])
+  useEffect(() => { load() }, [])
 
   const filteredItems = useMemo(() => {
     if (filterStatus === 'Todos') return items
     return items.filter(lead => lead.status === filterStatus)
   }, [items, filterStatus])
 
-  const updateStatus = async (id, status)=>{
-    try{
+  const updateStatus = async (id, status) => {
+    try {
       const res = await api().put(`/api/leads/${id}/status`, { status })
       setItems(current => current.map(item => item.id === id ? res.data : item))
-    }catch(err){
+    } catch (err) {
       alert('Falha ao atualizar status do lead')
     }
   }
@@ -53,11 +45,11 @@ export default function AdminLeads(){
           Filtrar por status:
           <select
             value={filterStatus}
-            onChange={e=>setFilterStatus(e.target.value)}
+            onChange={e => setFilterStatus(e.target.value)}
             className="border border-border rounded-md px-2 py-1 text-sm"
           >
             <option value="Todos">Todos</option>
-            {statuses.map(status => <option key={status} value={status}>{status}</option>)}
+            {LEAD_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
           </select>
         </label>
       </div>
@@ -74,7 +66,7 @@ export default function AdminLeads(){
             </tr>
           </thead>
           <tbody>
-            {filteredItems.map(lead=> (
+            {filteredItems.map(lead => (
               <tr key={lead.id} className="border-b border-border hover:bg-background">
                 <td className="p-3">{lead.name}</td>
                 <td className="p-3">{lead.email || '-'}</td>
@@ -84,13 +76,13 @@ export default function AdminLeads(){
                 </td>
                 <td className="p-3">
                   <div className="flex items-center gap-2">
-                    <Badge status={STATUS_KEY[lead.status]}>{lead.status}</Badge>
+                    <Badge status={LEAD_STATUS_BADGE_KEY[lead.status]}>{lead.status}</Badge>
                     <select
                       value={lead.status}
-                      onChange={e=>updateStatus(lead.id, e.target.value)}
+                      onChange={e => updateStatus(lead.id, e.target.value)}
                       className="border border-border rounded-md px-2 py-1 text-xs"
                     >
-                      {statuses.map(status => <option key={status} value={status}>{status}</option>)}
+                      {LEAD_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
                     </select>
                   </div>
                 </td>
