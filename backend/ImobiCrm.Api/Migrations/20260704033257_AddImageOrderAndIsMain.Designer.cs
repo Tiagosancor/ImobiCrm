@@ -7,15 +7,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-#nullable disable
-
 namespace ImobiCrm.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260704033257_AddImageOrderAndIsMain")]
     partial class AddImageOrderAndIsMain
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

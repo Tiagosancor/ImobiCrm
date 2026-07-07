@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import AdminLayout from '@/components/AdminLayout'
-import { api } from '@/lib/api'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
+import { propertyService } from '@/services/propertyService'
 
 export default function AdminProperties() {
   const [items, setItems] = useState([])
@@ -13,7 +13,7 @@ export default function AdminProperties() {
 
   const load = async () => {
     try {
-      const res = await api().get('/api/properties?page=1&pageSize=1000')
+      const res = await propertyService.listAdmin({ page: 1, pageSize: 1000 })
       setItems(res.data.items)
     } catch (err) {
       alert('Falha ao carregar imóveis')
@@ -23,7 +23,7 @@ export default function AdminProperties() {
   useEffect(() => { load() }, [])
 
   const remove = async (id) => {
-    await api().delete(`/api/properties/${id}`)
+    await propertyService.delete(id)
     load()
   }
 
@@ -34,7 +34,7 @@ export default function AdminProperties() {
   }
 
   const toggleActive = async (id, active) => {
-    await api().post(`/api/properties/${id}/${active ? 'deactivate' : 'activate'}`)
+    await (active ? propertyService.deactivate(id) : propertyService.activate(id))
     load()
   }
 

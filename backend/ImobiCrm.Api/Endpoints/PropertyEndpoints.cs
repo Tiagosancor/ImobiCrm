@@ -52,6 +52,47 @@ public static class PropertyEndpoints
             return Results.Ok(new { total, page, pageSize, items });
         });
 
+        app.MapGet("/api/properties/admin", async (ApplicationDbContext db,
+            [FromQuery] string? city,
+            [FromQuery] string? neighborhood,
+            [FromQuery] decimal? minPrice,
+            [FromQuery] decimal? maxPrice,
+            [FromQuery] int? bedrooms,
+            [FromQuery] int? bathrooms,
+            [FromQuery] double? minArea,
+            [FromQuery] double? maxArea,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20) =>
+        {
+            var query = db.Properties.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(city))
+                query = query.Where(p => p.City != null && p.City.ToLower().Contains(city.ToLower()));
+            if (!string.IsNullOrWhiteSpace(neighborhood))
+                query = query.Where(p => p.Neighborhood != null && p.Neighborhood.ToLower().Contains(neighborhood.ToLower()));
+            if (minPrice.HasValue)
+                query = query.Where(p => p.Price >= minPrice.Value);
+            if (maxPrice.HasValue)
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            if (bedrooms.HasValue)
+                query = query.Where(p => p.Bedrooms == bedrooms.Value);
+            if (bathrooms.HasValue)
+                query = query.Where(p => p.Bathrooms == bathrooms.Value);
+            if (minArea.HasValue)
+                query = query.Where(p => p.Area >= minArea.Value);
+            if (maxArea.HasValue)
+                query = query.Where(p => p.Area <= maxArea.Value);
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Results.Ok(new { total, page, pageSize, items });
+        }).RequireAuthorization();
+
         app.MapPost("/api/properties", async (PropertyCreateDto dto, ApplicationDbContext db) =>
         {
             if (!ValidationHelpers.TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);

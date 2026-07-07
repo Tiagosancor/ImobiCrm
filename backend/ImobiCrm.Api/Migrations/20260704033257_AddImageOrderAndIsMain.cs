@@ -1,13 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
-
 namespace ImobiCrm.Api.Migrations
 {
-    /// <inheritdoc />
     public partial class AddImageOrderAndIsMain : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
@@ -25,7 +21,6 @@ namespace ImobiCrm.Api.Migrations
                 defaultValue: 0);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
