@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import AdminLayout from '@/components/AdminLayout'
-import { api } from '@/lib/api'
+import { propertyService } from '@/services/propertyService'
 import FormInput from '@/components/FormInput'
 import { DragDropProvider } from '@dnd-kit/react'
 import { move } from '@dnd-kit/helpers'
@@ -21,7 +21,7 @@ export default function EditProperty() {
 
   const load = async () => {
     if (!id) return
-    const res = await api().get(`/api/properties/${id}`)
+    const res = await propertyService.getById(id)
     setProperty(res.data)
     setTitle(res.data.title)
     setPrice(res.data.price)
@@ -40,7 +40,7 @@ export default function EditProperty() {
     if (price <= 0) errs.price = 'Preço deve ser maior que zero'
     setErrors(errs)
     if (Object.keys(errs).length) return
-    await api().put(`/api/properties/${id}`, { title, description, price, bedrooms: property.bedrooms, bathrooms: property.bathrooms, garageSpaces: property.garageSpaces, area: property.area, city: property.city, neighborhood: property.neighborhood, active: property.active || true })
+    await propertyService.update(id, { title, description, price, bedrooms: property.bedrooms, bathrooms: property.bathrooms, garageSpaces: property.garageSpaces, area: property.area, city: property.city, neighborhood: property.neighborhood, active: property.active || true })
     alert('Salvo')
   }
 
@@ -49,28 +49,28 @@ export default function EditProperty() {
     if (!file) return
     const fd = new FormData()
     fd.append('file', file)
-    const res = await api().post(`/api/properties/${id}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    const res = await propertyService.uploadImage(id, file)
     setImages(prev => [...prev, { id: res.data.id, fileName: res.data.fileName }])
   }
 
   const removeImage = async (imageId) => {
     if (!confirm('Remover imagem?')) return
-    await api().delete(`/api/properties/${id}/images/${imageId}`)
+    await propertyService.deleteImage(id, imageId)
     setImages(prev => prev.filter(i => i.id !== imageId))
   }
 
   const setMainImage = async (imageId) => {
-    await api().put(`/api/properties/${id}/images/${imageId}/main`)
+    await propertyService.setMainImage(id, imageId)
     setImages(prev => prev.map(i => ({ ...i, isMain: i.id === imageId })))
   }
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = async (event) => {
     if (event.canceled) return
 
     setImages((images) => move(images, event))
 
     const newOrder = move(images, event).map(img => img.id)
-    api().put(`/api/properties/${id}/images/order`, { imageIds: newOrder })
+    await propertyService.orderImages(id, newOrder)
   }
 
   if (!property) return <AdminLayout><div>Carregando...</div></AdminLayout>

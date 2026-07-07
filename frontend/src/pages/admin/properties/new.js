@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import AdminLayout from '@/components/AdminLayout'
-import { api } from '@/lib/api'
+import { propertyService } from '@/services/propertyService'
 import Router from 'next/router'
 import FormInput from '@/components/FormInput'
 import Button from '@/components/ui/Button'
@@ -32,7 +32,7 @@ export default function NewProperty() {
     if (!city) return alert('Cidade é obrigatória')
     if (!neighborhood) return alert('Bairro é obrigatório')
     try {
-      const res = await api().post('/api/properties', { title, description, price, bedrooms, bathrooms, garageSpaces, area: areaNumber, city, neighborhood, active })
+      const res = await propertyService.create({ title, description, price, bedrooms, bathrooms, garageSpaces, area: areaNumber, city, neighborhood, active })
       Router.push('/admin/properties')
     } catch (err) {
       alert(err?.response?.data?.error || 'Erro ao criar')
