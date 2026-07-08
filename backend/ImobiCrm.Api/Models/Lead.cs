@@ -9,6 +9,6 @@ public class Lead
     public string? Phone { get; set; }
     public string? Message { get; set; }
     public string Status { get; set; } = "Novo";
-
     public Property? Property { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

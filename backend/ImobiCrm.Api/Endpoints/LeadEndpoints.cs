@@ -31,7 +31,7 @@ public static class LeadEndpoints
         });
 
         app.MapGet("/api/leads", async (ApplicationDbContext db) =>
-            await db.Leads.OrderByDescending(l => l.Id).ToListAsync()).RequireAuthorization();
+            await db.Leads.OrderByDescending(l => l.CreatedAt).ToListAsync()).RequireAuthorization();
 
         app.MapGet("/api/leads/{id}", async (int id, ApplicationDbContext db) =>
         {

@@ -13,6 +13,6 @@ public class Property
     public string? City { get; set; }
     public string? Neighborhood { get; set; }
     public bool Active { get; set; } = true;
-
     public ICollection<PropertyImage> Images { get; set; } = new List<PropertyImage>();
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

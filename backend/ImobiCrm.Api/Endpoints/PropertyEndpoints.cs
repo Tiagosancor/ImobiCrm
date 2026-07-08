@@ -44,7 +44,7 @@ public static class PropertyEndpoints
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(p => p.Id)
+                .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -85,7 +85,7 @@ public static class PropertyEndpoints
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(p => p.Id)
+                .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
