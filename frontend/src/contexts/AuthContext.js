@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { api } from '@/lib/api'
+import { authService } from '@/services/authService'
 
 const AuthContext = createContext(null)
 
@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
         if (!token) {
             setLoading(false)
         } else {
-            api().get('/api/auth/me')
+            authService.getCurrentUser()
                 .then(res => {
                     setUser(res.data)
                     setLoading(false)
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
 
     const login = (token) => {
         localStorage.setItem('token', token)
-        api().get('/api/auth/me')
+        authService.getCurrentUser()
             .then(res => {
                 setUser(res.data)
                 router.push('/admin/properties')

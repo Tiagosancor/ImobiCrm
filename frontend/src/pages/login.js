@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import axios from 'axios'
+import { authService } from '@/services/authService'
 import FormInput from '@/components/FormInput'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
@@ -20,7 +20,7 @@ export default function Login() {
     setErrors(errs)
     if (Object.keys(errs).length) return
     try {
-      const res = await axios.post('/api/auth/login', { email, password }, { baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000' })
+      const res = await authService.login({ email, password })
       const token = res.data.token
       login(token)
     } catch (err) {

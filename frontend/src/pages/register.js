@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import axios from 'axios'
+import { authService } from '@/services/authService'
 import Router from 'next/router'
 import FormInput from '@/components/FormInput'
 import Layout from '@/components/Layout'
@@ -22,7 +22,7 @@ export default function Register() {
     setErrors(errs)
     if (Object.keys(errs).length) return
     try {
-      await axios.post('/api/auth/register', { name, email, password }, { baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000' })
+      await authService.register({ name, email, password })
       Router.push('/login')
     } catch (err) {
       setErrors({ form: err?.response?.data?.error || 'Registro falhou' })
