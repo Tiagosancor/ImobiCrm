@@ -19,6 +19,12 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<User>(b =>
+        {
+            b.HasKey(u => u.Id);
+            b.HasIndex(u => u.Email).IsUnique();
+        });
+
         modelBuilder.Entity<Property>(b =>
         {
             b.HasKey(p => p.Id);
