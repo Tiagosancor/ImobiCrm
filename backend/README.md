@@ -1,6 +1,6 @@
 # Backend ASP.NET Core — ImobiCrm
 
-Pasta: `backend/ImobiCrm.Api`
+Pasta: `backend/src/ImobiCrm.Api`
 
 Passos iniciais para rodar localmente:
 
@@ -15,15 +15,15 @@ docker compose up -d
 2) Aplicar as migrations do Entity Framework Core:
 
 ```powershell
-dotnet restore backend/ImobiCrm.Api
+dotnet restore backend/src/ImobiCrm.Api
 dotnet tool install --global dotnet-ef
-dotnet ef database update --project backend/ImobiCrm.Api
+dotnet ef database update --project backend/src/ImobiCrm.Api
 ```
 
 3) Rodar a API:
 
 ```powershell
-dotnet run --project backend/ImobiCrm.Api
+dotnet run --project backend/src/ImobiCrm.Api
 ```
 
-Edite a connection string em `backend/ImobiCrm.Api/appsettings.json` se necessário.
+Edite a connection string em `backend/src/ImobiCrm.Api/appsettings.json` se necessário.

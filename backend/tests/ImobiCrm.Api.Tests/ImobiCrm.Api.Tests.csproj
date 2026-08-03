@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ImobiCrm.Api\ImobiCrm.Api.csproj" />
+    <ProjectReference Include="..\..\src\ImobiCrm.Api\ImobiCrm.Api.csproj" />
   </ItemGroup>
 
 </Project>
