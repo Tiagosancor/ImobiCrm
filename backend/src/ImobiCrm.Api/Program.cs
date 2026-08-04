@@ -73,4 +73,6 @@ app.MapAuthEndpoints(builder.Configuration);
 
 app.MapLeadEndpoints();
 
+app.MapClientEndpoints();
+
 app.Run();
