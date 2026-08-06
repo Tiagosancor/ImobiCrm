@@ -6,3 +6,7 @@ namespace ImobiCrm.Api.Dtos;
 public record ClientPropertyCreateDto(
     [property: Required] [property: EnumDataType(typeof(ClientPropertyRelationType))] ClientPropertyRelationType RelationType
 );
+
+public record ClientPropertyUpdateDto(
+    [property: Required] [property: EnumDataType(typeof(ClientPropertyRelationType))] ClientPropertyRelationType RelationType
+);

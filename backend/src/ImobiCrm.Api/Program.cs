@@ -83,4 +83,6 @@ app.MapClientEmailEndpoints();
 
 app.MapClientServiceHistoryEndpoints();
 
+app.MapClientPropertyEndpoints();
+
 app.Run();
