@@ -75,4 +75,12 @@ app.MapLeadEndpoints();
 
 app.MapClientEndpoints();
 
+app.MapClientPhoneEndpoints();
+
+app.MapClientAddressEndpoints();
+
+app.MapClientEmailEndpoints();
+
+app.MapClientServiceHistoryEndpoints();
+
 app.Run();

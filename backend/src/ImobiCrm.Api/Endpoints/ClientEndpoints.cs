@@ -1,5 +1,6 @@
 using ImobiCrm.Api.Data;
 using ImobiCrm.Api.Dtos;
+using ImobiCrm.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +38,7 @@ public static class ClientEndpoints
         {
            if (!ValidationHelpers.TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
            
-           var client = new ImobiCrm.Api.Models.Client
+           var client = new Client
            {
                Name = dto.Name,
                Document = dto.Document,

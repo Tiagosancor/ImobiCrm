@@ -97,7 +97,7 @@ public static class PropertyEndpoints
         {
             if (!ValidationHelpers.TryValidate(dto, out var errors)) return Results.ValidationProblem(errors);
 
-            var prop = new ImobiCrm.Api.Models.Property
+            var prop = new Property
             {
                 Title = dto.Title,
                 Description = dto.Description,
