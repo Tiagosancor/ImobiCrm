@@ -13,6 +13,7 @@ export default function AdminLayout({ children }) {
     { href: '/admin/leads', label: 'Leads' },
     { href: '/admin/properties', label: 'Imóveis (Admin)' },
     { href: '/', label: 'Site' },
+    { href: '/admin/clients', label: 'Clientes' },
   ]
 
   if (loading) return <div>Verificando autenticação...</div>

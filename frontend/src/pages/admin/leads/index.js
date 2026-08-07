@@ -6,9 +6,6 @@ import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import { LEAD_STATUSES, LEAD_STATUS_BADGE_KEY } from '@/constants/leadStatus'
 
-
-
-
 export default function AdminLeads() {
   const [items, setItems] = useState([])
   const [filterStatus, setFilterStatus] = useState('Todos')
