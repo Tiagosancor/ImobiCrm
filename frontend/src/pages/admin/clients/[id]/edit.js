@@ -14,15 +14,21 @@ export default function EditClient() {
     const [document, setDocument] = useState('')
     const [type, setType] = useState('')
     const [observations, setObservations] = useState('')
+    const [phones, setPhones] = useState([])
+    const [newPhoneNumber, setNewPhoneNumber] = useState('')
+    const [newPhoneIsWhatsapp, setNewPhoneIsWhatsapp] = useState(false)
+    const [newPhoneIsMain, setNewPhoneIsMain] = useState(false)
 
     const load = async () => {
         if (!id) return
         const res = await clientService.getById(id)
+        const phonesRes = await clientService.listPhones(id)
         setClient(res.data)
         setName(res.data.name)
         setDocument(res.data.document)
         setType(res.data.type)
         setObservations(res.data.observations || '')
+        setPhones(phonesRes.data || [])
     }
 
     useEffect(() => { load() }, [id])
@@ -39,6 +45,28 @@ export default function EditClient() {
         if (Object.keys(errs).length) return
         await clientService.update(id, { name, document, type, observations, active: client ? client.active : true })
         alert('Salvo')
+    }
+
+    const addPhone = async (e) => {
+        e.preventDefault()
+        if (!newPhoneNumber) return alert('Número de telefone é obrigatório')
+        await clientService.addPhone(id, {
+            phoneNumber: newPhoneNumber,
+            isWhatsapp: newPhoneIsWhatsapp,
+            isMain: newPhoneIsMain
+        })
+
+        setNewPhoneNumber('')
+        setNewPhoneIsWhatsapp(false)
+        setNewPhoneIsMain(false)
+
+        load()
+    }
+
+    const removePhone = async (phoneId) => {
+        if (!confirm('Remover telefone?')) return
+        await clientService.removePhone(id, phoneId)
+        load()
     }
 
     if (!client) return <AdminLayout><div>Carregando...</div></AdminLayout>
@@ -63,6 +91,47 @@ export default function EditClient() {
                     </div>
                     <FormInput label="Observações" textarea value={observations} onChange={setObservations} error={errors?.observations} />
                     <Button type="submit" variant="primary">Salvar</Button>
+                </form>
+            </Card>
+            <Card className="mt-6">
+                <h2 className="text-xl font-semibold mb-4">Telefones</h2>
+                <ul className="mb-4">
+                    {phones.map(phone => (
+                        <li key={phone.id} className="flex justify-between items-center border-b border-border py-2">
+                            <span>{phone.phoneNumber}</span>
+                            <div className="flex space-x-2">
+                                {phone.isWhatsapp && <span className="text-xs text-green-500">WhatsApp</span>}
+                                {phone.isMain && <span className="text-xs text-blue-500">Principal</span>}
+                                <a href="#" onClick={e => { e.preventDefault(); removePhone(phone.id) }} className="text-xs text-red-500 hover:text-red-700">
+                                    Remover
+                                </a>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+                <form onSubmit={addPhone}>
+                    <FormInput label="Número de Telefone" value={newPhoneNumber} onChange={setNewPhoneNumber} />
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="isWhatsapp"
+                            checked={newPhoneIsWhatsapp}
+                            onChange={e => setNewPhoneIsWhatsapp(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="isWhatsapp" className="text-sm text-text-secondary">É WhatsApp</label>
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="isMain"
+                            checked={newPhoneIsMain}
+                            onChange={e => setNewPhoneIsMain(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="isMain" className="text-sm text-text-secondary">É Principal</label>
+                    </div>
+                    <Button type="submit" variant="secondary">Adicionar Telefone</Button>
                 </form>
             </Card>
         </AdminLayout>
