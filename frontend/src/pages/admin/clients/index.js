@@ -71,7 +71,7 @@ export default function AdminClients() {
                                 <td className="p-3">{client.type === 'Individual' ? 'Pessoa Física' : 'Pessoa Jurídica'}</td>
                                 <td className="p-3">{client.active ? 'Ativo' : 'Inativo'}</td>
                                 <td className="p-3">
-                                    <a href="#" className="text-accent">Editar</a>
+                                    <Link href={`/admin/clients/${client.id}/edit`} className="text-accent">Editar</Link>
                                 </td>
                             </tr>
                         ))}
