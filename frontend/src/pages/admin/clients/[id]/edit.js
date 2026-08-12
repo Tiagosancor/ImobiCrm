@@ -18,16 +18,21 @@ export default function EditClient() {
     const [newPhoneNumber, setNewPhoneNumber] = useState('')
     const [newPhoneIsWhatsapp, setNewPhoneIsWhatsapp] = useState(false)
     const [newPhoneIsMain, setNewPhoneIsMain] = useState(false)
+    const [emails, setEmails] = useState([])
+    const [newEmail, setNewEmail] = useState('')
+    const [newEmailIsMain, setNewEmailIsMain] = useState(false)
 
     const load = async () => {
         if (!id) return
         const res = await clientService.getById(id)
         const phonesRes = await clientService.listPhones(id)
+        const emailsRes = await clientService.listEmails(id)
         setClient(res.data)
         setName(res.data.name)
         setDocument(res.data.document)
         setType(res.data.type)
         setObservations(res.data.observations || '')
+        setEmails(emailsRes.data || [])
         setPhones(phonesRes.data || [])
     }
 
@@ -66,6 +71,26 @@ export default function EditClient() {
     const removePhone = async (phoneId) => {
         if (!confirm('Remover telefone?')) return
         await clientService.removePhone(id, phoneId)
+        load()
+    }
+
+    const addEmail = async (e) => {
+        e.preventDefault()
+        if (!newEmail) return alert('Email é obrigatório')
+        await clientService.addEmail(id, {
+            email: newEmail,
+            isMain: newEmailIsMain
+        })
+
+        setNewEmail('')
+        setNewEmailIsMain(false)
+
+        load()
+    }
+
+    const removeEmail = async (emailId) => {
+        if (!confirm('Remover email?')) return
+        await clientService.removeEmail(id, emailId)
         load()
     }
 
@@ -134,8 +159,37 @@ export default function EditClient() {
                     <Button type="submit" variant="secondary">Adicionar Telefone</Button>
                 </form>
             </Card>
+            <Card className="mt-6">
+                <h2 className="text-xl font-semibold mb-4">Emails</h2>
+                <ul className="mb-4">
+                    {emails.map(email => (
+                        <li key={email.id} className="flex justify-between items-center border-b border-border py-2">
+                            <span>{email.emailAddress}</span>
+                            <div className="flex space-x-2">
+                                {email.isMain && <span className="text-xs text-blue-500">Principal</span>}
+                                <a href="#" onClick={e => { e.preventDefault(); removeEmail(email.id) }} className="text-xs text-red-500 hover:text-red-700">
+                                    Remover
+                                </a>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+                <form onSubmit={addEmail}>
+                    <FormInput label="Endereço de Email" value={newEmail} onChange={setNewEmail} />
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="isMainEmail"
+                            checked={newEmailIsMain}
+                            onChange={e => setNewEmailIsMain(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="isMainEmail" className="text-sm text-text-secondary">É Principal</label>
+                    </div>
+                    <Button type="submit" variant="secondary">Adicionar Email</Button>
+                </form>
+            </Card>
         </AdminLayout>
     )
-
 }
 
