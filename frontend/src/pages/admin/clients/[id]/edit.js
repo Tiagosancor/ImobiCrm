@@ -6,6 +6,9 @@ import FormInput from '@/components/FormInput'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 
+const brazilianStates = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS',
+     'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+
 export default function EditClient() {
     const router = useRouter()
     const { id } = router.query
@@ -21,12 +24,22 @@ export default function EditClient() {
     const [emails, setEmails] = useState([])
     const [newEmail, setNewEmail] = useState('')
     const [newEmailIsMain, setNewEmailIsMain] = useState(false)
+    const [addresses, setAddresses] = useState([])
+    const [newStreet, setNewStreet] = useState('')
+    const [newNumber, setNewNumber] = useState('')
+    const [newComplement, setNewComplement] = useState('')
+    const [newNeighborhood, setNewNeighborhood] = useState('')
+    const [newCity, setNewCity] = useState('')
+    const [newState, setNewState] = useState('')
+    const [newZipCode, setNewZipCode] = useState('')
+    const [newIsMain, setNewIsMain] = useState(false)
 
     const load = async () => {
         if (!id) return
         const res = await clientService.getById(id)
         const phonesRes = await clientService.listPhones(id)
         const emailsRes = await clientService.listEmails(id)
+        const addressesRes = await clientService.listAddresses(id)
         setClient(res.data)
         setName(res.data.name)
         setDocument(res.data.document)
@@ -34,6 +47,7 @@ export default function EditClient() {
         setObservations(res.data.observations || '')
         setEmails(emailsRes.data || [])
         setPhones(phonesRes.data || [])
+        setAddresses(addressesRes.data || [])
     }
 
     useEffect(() => { load() }, [id])
@@ -91,6 +105,43 @@ export default function EditClient() {
     const removeEmail = async (emailId) => {
         if (!confirm('Remover email?')) return
         await clientService.removeEmail(id, emailId)
+        load()
+    }
+
+    const addAddress = async (e) => {
+        e.preventDefault()
+        if (!newStreet) return alert('Rua é obrigatória')
+        if (!newNeighborhood) return alert('Bairro é obrigatório')
+        if (!newCity) return alert('Cidade é obrigatória')
+        if (!newState) return alert('Estado é obrigatório')
+        if (!newZipCode) return alert('CEP é obrigatório')
+
+        await clientService.addAddress(id, {
+            street: newStreet,
+            number: newNumber,
+            complement: newComplement,
+            neighborhood: newNeighborhood,
+            city: newCity,
+            state: newState,
+            zipCode: newZipCode,
+            isMain: newIsMain
+        })
+
+        setNewStreet('')
+        setNewNumber('')
+        setNewComplement('')
+        setNewNeighborhood('')
+        setNewCity('')
+        setNewState('')
+        setNewZipCode('')
+        setNewIsMain(false)
+
+        load()
+    }
+
+    const removeAddress = async (addressId) => {
+        if (!confirm('Remover endereço?')) return
+        await clientService.removeAddress(id, addressId)
         load()
     }
 
@@ -187,6 +238,55 @@ export default function EditClient() {
                         <label htmlFor="isMainEmail" className="text-sm text-text-secondary">É Principal</label>
                     </div>
                     <Button type="submit" variant="secondary">Adicionar Email</Button>
+                </form>
+            </Card>
+            <Card className="mt-6">
+                <h2 className="text-xl font-semibold mb-4">Endereços</h2>
+                <ul className="mb-4">
+                    {addresses.map(address => (
+                        <li key={address.id} className="flex justify-between items-center border-b border-border py-2">
+                            <span>{address.street}, {address.number} - {address.complement} - {address.neighborhood} - {address.city}/{address.state}</span>
+                            <div className="flex space-x-2">
+                                {address.isMain && <span className="text-xs text-blue-500">Principal</span>}
+                                <a href="#" onClick={e => { e.preventDefault(); removeAddress(address.id) }} className="text-xs text-red-500 hover:text-red-700">
+                                    Remover
+                                </a>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+                <form onSubmit={addAddress}>
+                    <FormInput label="Rua" value={newStreet} onChange={setNewStreet} />
+                    <FormInput label="Número" value={newNumber} onChange={setNewNumber} />
+                    <FormInput label="Complemento" value={newComplement} onChange={setNewComplement} />
+                    <FormInput label="Bairro" value={newNeighborhood} onChange={setNewNeighborhood} />
+                    <FormInput label="Cidade" value={newCity} onChange={setNewCity} />
+                    <div className="mb-4">
+                        <label className="block text-sm text-text-secondary mb-1">UF</label>
+                        <select
+                            value={newState}
+                            onChange={e => setNewState(e.target.value)}
+                            className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                        >
+                            {brazilianStates.map(state => (
+                                <option key={state} value={state}>
+                                    {state}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <FormInput label="CEP" value={newZipCode} onChange={setNewZipCode} />
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="isMainAddress"
+                            checked={newIsMain}
+                            onChange={e => setNewIsMain(e.target.checked)}
+                            className="mr-2"
+                        />
+                        <label htmlFor="isMainAddress" className="text-sm text-text-secondary">É Principal</label>
+                    </div>
+                    <Button type="submit" variant="secondary">Adicionar Endereço</Button>
                 </form>
             </Card>
         </AdminLayout>
