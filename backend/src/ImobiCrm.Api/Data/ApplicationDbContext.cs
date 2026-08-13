@@ -62,6 +62,7 @@ public class ApplicationDbContext : DbContext
         {
             b.HasKey(cp => cp.Id);
             b.HasOne(cp => cp.Property).WithMany().HasForeignKey(cp => cp.PropertyId);
+            b.HasIndex(cp => new { cp.ClientId, cp.PropertyId }).IsUnique();
         });
 
         modelBuilder.Entity<ClientServiceHistory>(b =>
