@@ -26,6 +26,9 @@ public static class ClientPropertyEndpoints
             var property = await db.Properties.FindAsync(propertyId);
             if (property is null) return Results.NotFound();
 
+            var existingClientProperty = await db.ClientProperties.SingleOrDefaultAsync(cp => cp.ClientId == clientId && cp.PropertyId == propertyId);
+            if (existingClientProperty is not null) return Results.Conflict(new { error = "Este imóvel já está associado a este cliente" });
+
             var clientProperty = new ClientProperty
             {
                 ClientId = clientId,
