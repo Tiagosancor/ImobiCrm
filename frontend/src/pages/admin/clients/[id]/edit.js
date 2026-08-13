@@ -33,6 +33,8 @@ export default function EditClient() {
     const [newState, setNewState] = useState('')
     const [newZipCode, setNewZipCode] = useState('')
     const [newIsMain, setNewIsMain] = useState(false)
+    const [serviceHistory, setServiceHistory] = useState([])
+    const [newNotes, setNewNotes] = useState('')
 
     const load = async () => {
         if (!id) return
@@ -40,6 +42,7 @@ export default function EditClient() {
         const phonesRes = await clientService.listPhones(id)
         const emailsRes = await clientService.listEmails(id)
         const addressesRes = await clientService.listAddresses(id)
+        const serviceHistoryRes = await clientService.listServiceHistory(id)
         setClient(res.data)
         setName(res.data.name)
         setDocument(res.data.document)
@@ -48,6 +51,7 @@ export default function EditClient() {
         setEmails(emailsRes.data || [])
         setPhones(phonesRes.data || [])
         setAddresses(addressesRes.data || [])
+        setServiceHistory(serviceHistoryRes.data || [])
     }
 
     useEffect(() => { load() }, [id])
@@ -142,6 +146,15 @@ export default function EditClient() {
     const removeAddress = async (addressId) => {
         if (!confirm('Remover endereço?')) return
         await clientService.removeAddress(id, addressId)
+        load()
+    }
+
+    const addServiceHistory = async (e) => {
+        e.preventDefault()
+        await clientService.addServiceHistory(id, {
+            notes: newNotes
+        })
+        setNewNotes('')
         load()
     }
 
@@ -287,6 +300,20 @@ export default function EditClient() {
                         <label htmlFor="isMainAddress" className="text-sm text-text-secondary">É Principal</label>
                     </div>
                     <Button type="submit" variant="secondary">Adicionar Endereço</Button>
+                </form>
+            </Card>
+            <Card>
+                <h2 className="text-xl font-semibold mb-4">Histórico de Atendimento</h2>
+                <ul className="mb-4">
+                    {serviceHistory.map((serviceHistoryItem) => (
+                        <li key={serviceHistoryItem.id} className="py-2 border-b border-border">
+                            <span>{serviceHistoryItem.notes} - {serviceHistoryItem.user.name} - {new Date(serviceHistoryItem.createdAt).toLocaleDateString('pt-BR')}</span>
+                        </li>
+                    ))}
+                </ul>
+                <form onSubmit={addServiceHistory}>
+                    <FormInput label="Adicionar Nota" textarea value={newNotes} onChange={setNewNotes} />
+                    <Button type="submit" variant="secondary">Adicionar Nota</Button>
                 </form>
             </Card>
         </AdminLayout>
