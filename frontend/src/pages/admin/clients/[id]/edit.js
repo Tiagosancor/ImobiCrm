@@ -5,9 +5,19 @@ import { clientService } from '@/services/clientService'
 import FormInput from '@/components/FormInput'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { propertyService } from '@/services/propertyService'
 
 const brazilianStates = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS',
-     'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+    'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+
+const relationTypes = [
+    { value: 'Interested', label: 'Interessado' },
+    { value: 'Buyer', label: 'Comprador' },
+    { value: 'Owner', label: 'Proprietário' },
+    { value: 'Lessee', label: 'Locatário' },
+    { value: 'Guarantor', label: 'Fiador' },
+    { value: 'Other', label: 'Outro' },
+]
 
 export default function EditClient() {
     const router = useRouter()
@@ -15,7 +25,7 @@ export default function EditClient() {
     const [client, setClient] = useState(null)
     const [name, setName] = useState('')
     const [document, setDocument] = useState('')
-    const [type, setType] = useState('')
+    const [type, setType] = useState('Individual')
     const [observations, setObservations] = useState('')
     const [phones, setPhones] = useState([])
     const [newPhoneNumber, setNewPhoneNumber] = useState('')
@@ -35,6 +45,11 @@ export default function EditClient() {
     const [newIsMain, setNewIsMain] = useState(false)
     const [serviceHistory, setServiceHistory] = useState([])
     const [newNotes, setNewNotes] = useState('')
+    const [clientProperties, setClientProperties] = useState([])
+    const [availableProperties, setAvailableProperties] = useState([])
+    const [newPropertyId, setNewPropertyId] = useState('')
+    const [newRelationType, setNewRelationType] = useState('Owner')
+
 
     const load = async () => {
         if (!id) return
@@ -43,6 +58,8 @@ export default function EditClient() {
         const emailsRes = await clientService.listEmails(id)
         const addressesRes = await clientService.listAddresses(id)
         const serviceHistoryRes = await clientService.listServiceHistory(id)
+        const clientPropertiesRes = await clientService.listClientProperties(id)
+        const availablePropertiesRes = await propertyService.listAdmin({ page: 1, pageSize: 1000 })
         setClient(res.data)
         setName(res.data.name)
         setDocument(res.data.document)
@@ -51,6 +68,8 @@ export default function EditClient() {
         setEmails(emailsRes.data || [])
         setPhones(phonesRes.data || [])
         setAddresses(addressesRes.data || [])
+        setAvailableProperties(availablePropertiesRes.data.items || [])
+        setClientProperties(clientPropertiesRes.data || [])
         setServiceHistory(serviceHistoryRes.data || [])
     }
 
@@ -155,6 +174,38 @@ export default function EditClient() {
             notes: newNotes
         })
         setNewNotes('')
+        load()
+    }
+
+    const addClientProperty = async (e) => {
+        e.preventDefault()
+        if (!newPropertyId) return alert('Selecione uma propriedade')
+        if (!newRelationType) return alert('Selecione um tipo de relação')
+
+        try {
+            await clientService.addClientProperty(id, newPropertyId, {
+                relationType: newRelationType
+            })
+
+            setNewPropertyId('')
+            setNewRelationType('Owner')
+
+            load()
+        } catch (err) {
+            alert(err?.response?.data?.error || 'Falha ao adicionar imóvel')
+        }
+    }
+
+    const removeClientProperty = async (propertyId) => {
+        if (!confirm('Remover relação com a propriedade?')) return
+        await clientService.removeClientProperty(id, propertyId)
+        load()
+    }
+
+    const updateClientProperty = async (propertyId, relationType) => {
+        await clientService.updateClientProperty(id, propertyId, {
+            relationType
+        })
         load()
     }
 
@@ -314,6 +365,64 @@ export default function EditClient() {
                 <form onSubmit={addServiceHistory}>
                     <FormInput label="Adicionar Nota" textarea value={newNotes} onChange={setNewNotes} />
                     <Button type="submit" variant="secondary">Adicionar Nota</Button>
+                </form>
+            </Card>
+            <Card className="mt-6">
+                <h2 className="text-xl font-semibold mb-4">Imóveis Associados</h2>
+                <ul className="mb-4">
+                    {clientProperties.map(item => (
+                        <li key={item.propertyId} className="flex justify-between items-center border-b border-border py-2">
+                            <span>{item.property?.title}</span>
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={item.relationType}
+                                    onChange={e => updateClientProperty(item.propertyId, e.target.value)}
+                                    className="border border-border rounded-md px-2 py-1 text-xs"
+                                >
+                                    {relationTypes.map(rt => (
+                                        <option key={rt.value} value={rt.value}>{rt.label}</option>
+                                    ))}
+                                </select>
+                                <a
+                                    href="#"
+                                    onClick={e => { e.preventDefault(); removeClientProperty(item.propertyId) }}
+                                    className="text-xs text-red-500 hover:text-red-700"
+                                >
+                                    Remover
+                                </a>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+                <form onSubmit={addClientProperty}>
+                    <div className="mb-4">
+                        <label className="block text-sm text-text-secondary mb-1">Imóvel</label>
+                        <select
+                            value={newPropertyId}
+                            onChange={e => setNewPropertyId(e.target.value)}
+                            className="w-full border border-border rounded-md px-3 py-2 text-sm"
+                        >
+                            <option value="">Selecione um imóvel</option>
+                            {availableProperties.map(property => (
+                                <option key={property.id} value={property.id}>
+                                    {property.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm text-text-secondary mb-1">Tipo de Relação</label>
+                        <select
+                            value={newRelationType}
+                            onChange={e => setNewRelationType(e.target.value)}
+                            className="w-full border border-border rounded-md px-3 py-2 text-sm"
+                        >
+                            {relationTypes.map(rt => (
+                                <option key={rt.value} value={rt.value}>{rt.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <Button type="submit" variant="secondary">Adicionar Imóvel</Button>
                 </form>
             </Card>
         </AdminLayout>
