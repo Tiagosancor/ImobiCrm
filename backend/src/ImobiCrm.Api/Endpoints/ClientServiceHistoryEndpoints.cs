@@ -11,7 +11,7 @@ public static class ClientServiceHistoryEndpoints
     {
         app.MapGet("/api/clients/{id:int}/service-history", async (int id, ApplicationDbContext db) =>
         {
-            var serviceHistory = await db.ClientServiceHistories
+            var serviceHistory = await db.ClientServiceHistories.Include(sh => sh.User)
                 .Where(sh => sh.ClientId == id)
                 .OrderByDescending(sh => sh.CreatedAt)
                 .ToListAsync();
